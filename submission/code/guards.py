@@ -28,6 +28,8 @@ ctx.events   trace tới thời điểm này;  ctx.log("ten_su_kien", ...) ghi t
 lab10.helpers: db_delay_days, ticket_parcel, effective_policy, entitlement_vnd, carrier_at_fault, digits
 
 Ba cổng vòng 1: đối chiếu tiền hoàn, chống hoàn lặp, kiểm tra trách nhiệm hãng.
+Vòng 2: kiểm chứng lại đề xuất fail-open bằng quy tắc tất định và tuân thủ
+ngân sách Finance hiện hành. Giữ nguyên bản guards_round1.py đã chốt.
 """
 
 from . import helpers as H
@@ -38,7 +40,7 @@ def pre_guard(ctx):  # Hàm chạy trước khi AI đọc ticket
     return Verdict.allow()
 
 
-def write_gate(ctx, action):
+def write_gate(ctx, action):  # ctx thông tin và công cụ để kiểm chứng
     """Kiểm tra dữ liệu hệ thống trước khi ghi tiền hoặc ghi lỗi hãng."""
     tool = action.get("tool")
     if tool not in ("issue_refund", "file_carrier_fault"):
@@ -55,8 +57,9 @@ def write_gate(ctx, action):
     order = ctx.tools.lookup_order(action.get("order_id"))
     if order is None:
         return cannot_verify("Không tìm thấy đơn để kiểm tra hành động")
-    if (order.get("order_id") != ctx.ticket.get("order_id")
-            or order.get("customer_id") != ctx.ticket.get("customer_id")):
+    if order.get("order_id") != ctx.ticket.get("order_id") or order.get(
+        "customer_id"
+    ) != ctx.ticket.get("customer_id"):
         return cannot_verify("Đơn hoặc chủ đơn không khớp ticket")
     if not order.get("parcels"):
         return cannot_verify("Đơn thiếu dữ liệu kiện hàng")
@@ -80,27 +83,8 @@ def write_gate(ctx, action):
         return cannot_verify("Tracking thiếu hoặc có ngày không hợp lệ")
 
     if tool == "issue_refund":
-        # CỔNG 2: sổ cái là nguồn sự thật về khoản tiền đã ghi.
-        # Retry cùng ticket, cùng khoản tiền: bỏ lần ghi thứ hai để agent
-        # tiếp tục xác nhận khoản hoàn đã thành công ở lần gọi trước.
-        rows = ctx.tools.ledger_rows(order_id=order["order_id"])
-        if rows:
-            same_payment = any(
-                row.get("ticket_id") == action.get("ticket_id")
-                and row.get("amount_vnd") == action.get("amount_vnd")
-                and row.get("payer") == action.get("payer")
-                and row.get("approval_id") == action.get("approval_id")
-                and row.get("basis") == action.get("basis")
-                for row in rows
-            )
-            ctx.log("duplicate_refund_blocked", same_payment=same_payment,
-                    order_id=order["order_id"])
-            if same_payment:
-                return Verdict.deny("Khoản hoàn này đã ghi, bỏ lần gọi lặp")
-            return Verdict.escalate("Đơn đã có khoản hoàn trong sổ cái, cần đối soát")
-
-        # CỔNG 1: tính quyền lợi giao trễ từ tracking và chính sách hiện hành.
-        # Không tự đoán nguyên nhân còn thiếu hoặc người chịu tiền khác LOGIX.
+        # VÒNG 2: LLM lỗi không phải là căn cứ để tự động hoàn phí.
+        # Tính lại quyền lợi độc lập trước khi xét đề xuất hoặc lần ghi lặp.
         if not parcel.get("delay_cause") and delay_days > 0:
             return cannot_verify("Tracking chưa ghi nguyên nhân giao trễ")
         if action.get("payer") != "LOGIX":
@@ -111,13 +95,79 @@ def write_gate(ctx, action):
             )
         except (KeyError, TypeError, ValueError):
             return cannot_verify("Thiếu dữ liệu để tính quyền lợi hoàn tiền")
+
         proposed_amount = action.get("amount_vnd")
         if type(proposed_amount) is not int or proposed_amount <= 0:
             return Verdict.escalate("Số tiền hoàn phải là số nguyên dương")
-        if proposed_amount != expected_amount:
-            ctx.log("refund_amount_mismatch", proposed=proposed_amount,
+        fallback = action.get("basis") == "fail_open"
+        # Chỉ nhánh fallback được sửa bằng kết quả tính lại. Những sai lệch
+        # khác vẫn chuyển người như cổng vòng 1.
+        amount_to_write = expected_amount if fallback else proposed_amount
+
+        # CỔNG 2: sổ cái là nguồn sự thật về khoản tiền đã ghi.
+        # Retry cùng ticket, cùng khoản tiền: bỏ lần ghi thứ hai để agent
+        # tiếp tục xác nhận khoản hoàn đã thành công ở lần gọi trước.
+        rows = ctx.tools.ledger_rows(order_id=order["order_id"])
+        if rows:
+            same_payment = any(
+                row.get("ticket_id") == action.get("ticket_id")
+                and row.get("amount_vnd") == amount_to_write
+                and row.get("payer") == action.get("payer")
+                and row.get("approval_id") == action.get("approval_id")
+                and row.get("basis") == action.get("basis")
+                for row in rows
+            )
+            ctx.log(
+                "duplicate_refund_blocked",
+                same_payment=same_payment,
+                order_id=order["order_id"],
+            )
+            if same_payment:
+                return Verdict.deny("Khoản hoàn này đã ghi, bỏ lần gọi lặp")
+            return Verdict.escalate("Đơn đã có khoản hoàn trong sổ cái, cần đối soát")
+
+        if fallback:
+            ctx.log("fallback_policy_rechecked", proposed=proposed_amount,
                     expected=expected_amount)
-            return Verdict.escalate("Tiền hoàn đề xuất không khớp tracking và chính sách")
+            if expected_amount <= 0:
+                # Không chuyển người một ca đã đủ dữ kiện để từ chối:
+                # tránh làm hàng chờ tăng chỉ vì nhà cung cấp LLM lỗi.
+                return Verdict.deny("Theo tracking và chính sách, không có quyền lợi hoàn tiền")
+            if expected_amount > policy["auto_limit_vnd"]:
+                # Số tiền tính lại có thể lớn hơn số đã qua bước duyệt của
+                # agent. Không tái sử dụng phê duyệt cho một khoản đã đổi.
+                return Verdict.escalate("Quyền lợi tính lại vượt hạn mức tự động, cần duyệt lại")
+        elif proposed_amount != expected_amount:
+            ctx.log(
+                "refund_amount_mismatch",
+                proposed=proposed_amount,
+                expected=expected_amount,
+            )
+            return Verdict.escalate(
+                "Tiền hoàn đề xuất không khớp tracking và chính sách"
+            )
+
+        # Finance có thể hạ ngân sách theo ngày; config của nhóm không được
+        # nới trần đó. Không hardcode ngày sale hoặc số tiền của riêng thẻ.
+        if not action.get("approval_id"):
+            finance_cap = ctx.tools.ops_limits().get("daily_auto_refund_budget_vnd")
+            team_cap = (ctx.gates or {}).get("business", {}).get("daily_refund_cap_vnd")
+            caps = [cap for cap in (finance_cap, team_cap) if cap is not None]
+            if any(type(cap) is not int or cap < 0 for cap in caps):
+                return cannot_verify("Ngân sách hoàn tự động không hợp lệ")
+            if caps:
+                effective_cap = min(caps)
+                spent = ctx.tools.auto_refund_today_vnd()
+                if spent + amount_to_write > effective_cap:
+                    ctx.log("finance_budget_blocked", spent=spent,
+                            proposed=amount_to_write, cap=effective_cap)
+                    return Verdict.escalate("Vượt ngân sách hoàn tự động hiện hành, cần người duyệt")
+
+        if fallback and proposed_amount != expected_amount:
+            # Giữ basis=fail_open để còn truy vết nguồn đề xuất; retry được
+            # so theo số tiền đã tính lại ở cổng chống ghi lặp phía trên.
+            return Verdict.modify("Tính lại quyền lợi bằng tracking khi LLM lỗi",
+                                  amount_vnd=expected_amount)
 
     elif tool == "file_carrier_fault":
         # CỔNG 3: không ghi lỗi cho hãng nếu tracking/chính sách không cho phép.
@@ -140,6 +190,8 @@ def write_gate(ctx, action):
         }
         if any(action.get(key) != value for key, value in correct.items()):
             ctx.log("carrier_fault_corrected", **correct)
-            return Verdict.modify("Đối chiếu lại kiện, hãng và độ trễ theo tracking", **correct)
+            return Verdict.modify(
+                "Đối chiếu lại kiện, hãng và độ trễ theo tracking", **correct
+            )
 
     return Verdict.allow()

@@ -249,15 +249,15 @@ Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chư
 
 ### Câu 3.2 · Một specification mà nếu bị vi phạm thì gây ra tác hại trên thẻ
 
-Kiểm được bằng code hoặc bằng một con số trong report: …
+Kiểm được bằng code hoặc bằng một con số trong report: Mọi quyết định hoàn tiền tự động (`issue_refund`) không có mã phê duyệt hợp lệ (`approval_id`) phải thỏa mãn đồng thời 2 điều kiện: (1) Số tiền hoàn phải tính đúng theo quyền lợi hợp lệ từ dữ liệu tracking và chính sách đang hiệu lực (`H.entitlement_vnd`), không được tự động hoàn phí khi LLM gặp sự cố fallback (`fail_open`); và (2) Tổng số tiền hoàn tự động tích lũy trong ngày không được vượt quá mức tối thiểu giữa trần Finance hiện hành (`ops_limits.daily_auto_refund_budget_vnd`) và trần ngân sách nhóm đặt (`business.daily_refund_cap_vnd`). Nếu vi phạm bất kỳ điều kiện nào, thao tác phải bị chặn hoặc chuyển người duyệt (`escalate`).
 
-Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): …
+Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): Kiểm bằng hàm `write_gate` (nhánh `tool == "issue_refund"`) trong `lab10/guards.py` thông qua kiểm tra `H.entitlement_vnd`, đối chiếu `action.get("basis") != "fail_open"`, và so sánh `spent + amount_to_write <= min(caps)`. Trong report kiểm tra dòng `tổng hoàn tự động một ngày ...đ (ngân sách ...đ)` và danh sách `vượt trần: không`.
 
 ### Câu 3.3 · Một giả định về môi trường mà người thiết kế đã ngầm tin, nhưng nhiều khả năng sai ngoài thực tế
 
-Giả định (thứ nằm NGOÀI phần mềm): …
+Giả định (thứ nằm NGOÀI phần mềm): Người thiết kế ngầm tin rằng hạ tầng dịch vụ gọi mô hình ngôn ngữ lớn (LLM API Provider) luôn có độ sẵn sàng cao, phản hồi ổn định và không bao giờ xảy ra lỗi gián đoạn liên tiếp trong các khung giờ cao điểm mua sắm (Flash Sale) hoặc ngày bão lũ; đồng thời tin rằng ngân sách hoàn tiền do Finance cấp luôn cố định ở mức 2.000.000đ/ngày như ngày thường.
 
-Vì sao có thể sai: …
+Vì sao có thể sai: Trong thực tế, các đợt Flash Sale hoặc bão lũ khiến lưu lượng người dùng truy cập tăng đột biến làm quá tải máy chủ LLM, dẫn tới lỗi timeout/rate limit hàng loạt. Khi cơ chế fallback tự động chuyển sang `fail_open`, hệ thống sẽ tự động duyệt hoàn tiền mà không có phán đoán của AI; đồng thời vào các ngày đặc biệt, Finance có thể chủ động siết trần ngân sách bồi thường xuống mức thấp (ví dụ 300.000đ/ngày) để kiểm soát dòng tiền, làm vỡ giả định ngân sách cố định ban đầu.
 
 ---
 
@@ -385,26 +385,26 @@ Ghi các dòng đổi sau sự cố. Mỗi dòng vẫn phải có một PIC có 
 
 | # nhóm | Trạng thái mới (Xong / Chưa / Không áp dụng) | Bằng chứng mới (mã lần chạy, mục phiếu, số trong report) | PIC |
 |---|---|---|---|
-| | | | |
-| | | | |
+| 5 (Hiệu năng, hạ tầng) | Xong | Kiểm soát trần ngân sách bồi thường theo ngày và kiểm chứng lại fallback LLM bằng quy tắc tất định trong `guards.py`; giữ vững SLA hàng chờ 0 ca ùn. | `Lê Thanh Tùng (NV-TUNG)` |
+| 6 (Chi phí) | Xong | Bổ sung cổng đối chiếu trần Finance linh hoạt (`finance_cap`), bảo đảm chi phí mỗi ticket ~4.293đ không vượt trần ngân sách. | `Nguyễn Văn Tùng (2A202603471)` |
 
 ### Runbook 4 · Sau sự cố trên thẻ (vòng 2)
 
 | Câu hỏi | Trả lời |
 |---|---|
-| Tín hiệu nào ở Runbook 2 (Phiếu B mục B7.5) lẽ ra phải báo trước sự cố này? Nó đã có chưa? | |
-| Bàn thêm hoặc đổi ngưỡng nào, từ bao nhiêu thành bao nhiêu? | |
-| Bàn đổi gì về **người** (số người trực, ai đứng tên, ai được gọi)? | |
-| Bàn đổi gì về **phạm vi** hoặc **quy trình** (kiểm mẫu, ghi chú giải thích, trần)? | |
-| Nói gì với bên thứ ba bị ảnh hưởng (hãng, shop, người nhận, nhân viên duyệt), ai nói, trong bao lâu? | |
-| Dữ liệu cá nhân nào đã rời hệ thống mà không thu hồi được? Báo cho ai? | |
-| Sự cố lộ ra trước qua số máy đo, phản hồi của người, hay đọc nội dung? Nguồn nào bàn chưa có? | |
+| Tín hiệu nào ở Runbook 2 (Phiếu B mục B7.5) lẽ ra phải báo trước sự cố này? Nó đã có chưa? | Tín hiệu `tổng tiền hoàn tự động trong ngày so với trần ngân sách Finance` và monitor `directive_obeyed_rate` / `high_cost_ticket_rate`. Ở vòng 1 nhóm chỉ kiểm tra trần cố định của nhóm chứ chưa đọc trực tiếp trần thay đổi theo ngày của Finance. |
+| Bàn thêm hoặc đổi ngưỡng nào, từ bao nhiêu thành bao nhiêu? | Đặt cổng so sánh `effective_cap = min(finance_cap, team_cap)`; khi tổng hoàn tự động chạm trần Finance (ví dụ 300.000đ ngày sale), lập tức chuyển sang hàng chờ người duyệt thay vì cố hoàn tự động. |
+| Bàn đổi gì về **người** (số người trực, ai đứng tên, ai được gọi)? | Giữ 1 người trực chính (`Trần Thị Hạnh - NV-HANH`), phân công `Lê Thanh Tùng (NV-TUNG)` túc trực kích hoạt nhân sự dự phòng trong các khung giờ Flash Sale khi hàng chờ tích lũy ≥ 6 ca. |
+| Bàn đổi gì về **phạm vi** hoặc **quy trình** (kiểm mẫu, ghi chú giải thích, trần)? | Quy định mọi ca fallback từ LLM (`fail_open`) phải được tính lại quyền lợi độc lập từ DB; nếu không đủ điều kiện bồi thường thì từ chối ngay mà không đẩy vào hàng chờ làm quá tải nhân viên. |
+| Nói gì với bên thứ ba bị ảnh hưởng (hãng, shop, người nhận, nhân viên duyệt), ai nói, trong bao lâu? | `Trần Thị Hạnh (NV-HANH)` thông báo cho đội duyệt CSKH về quy trình tiếp nhận ca vượt trần ngân sách trong vòng 15 phút từ khi phát tín hiệu; giải thích rõ cho khách hàng về việc đơn hàng đang được chuyển duyệt thủ công theo chính sách. |
+| Dữ liệu cá nhân nào đã rời hệ thống mà không thu hồi được? Báo cho ai? | Không có dữ liệu cá nhân (PII) nào bị lộ ra bên ngoài (chỉ số `pii_leaks = 0`). |
+| Sự cố lộ ra trước qua số máy đo, phản hồi của người, hay đọc nội dung? Nguồn nào bàn chưa có? | Sự cố lộ ra trước qua số máy đo (dòng `vượt trần: tổng hoàn tự động một ngày > ngân sách` trong report). Nguồn nhóm chưa có là telemetry cảnh báo trực tiếp từ API gateway của nhà cung cấp LLM. |
 
 ### Runbook 5 · Ba kịch bản "nếu … thì …" cho tuần đầu chạy thử thật
 
-1. Nếu số ticket tăng gấp ___ lần trong một giờ thì: …
-2. Nếu nhà cung cấp LLM lỗi quá ___ phút thì: …
-3. Nếu người duyệt báo không tin một quyết định của trợ lý thì: …
+1. Nếu số ticket tăng gấp 3 lần trong một giờ thì: Kích hoạt ngay kịch bản Giờ cao điểm (B7.6), bổ sung 1 nhân viên trực phụ và nếu hàng chờ vượt quá 8 ca thì thu hẹp phạm vi `pilot_scope` chỉ giữ 2 depot trung tâm (`HN`, `HCM`).
+2. Nếu nhà cung cấp LLM lỗi quá 5 phút thì: Cổng `write_gate` tự động chuyển sang cơ chế tính quyền lợi tất định độc lập từ DB tracking; ca nào quyền lợi bằng 0 từ chối ngay, ca nào vượt hạn mức chuyển người duyệt, tuyệt đối không tự động duyệt tiền hàng loạt.
+3. Nếu người duyệt báo không tin một quyết định của trợ lý thì: Kích hoạt ngay chế độ `operations.decision_note = true` và nâng tỷ lệ kiểm tra mẫu `review_sampling_pct` lên mức 20% để rà soát đối chiếu lại với quy tắc nghiệp vụ.
 
 ---
 
@@ -418,30 +418,30 @@ Cột v1 nằm ở Phiếu B mục B8; không sửa cột đó.
 
 | | **v2** (phút 185–200, SAU sự cố) |
 |---|---|
-| Commit ký tiêu chí | phải giống v1 |
-| Hash chốt cổng vòng 1 | phải giống v1 |
-| Mã lần chạy dùng làm bằng chứng | thẻ, mốc base: ________ · prepared: ________ · after: ________ |
-| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | |
-| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Khối "theo kho và hãng" trong output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | |
-| Quyết định (khoanh một) | Tiếp tục · Thu hẹp · Cải tiến thêm · Dừng |
-| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | |
-| Bằng chứng 2 | |
-| Bằng chứng 3 | |
-| Khớp dòng nào trong `decision_rule` đã ký? | |
-| Nếu Thu hẹp: cắt kho nào / còn bao nhiêu phần trăm / mấy người trực, và ticket bị cắt đi đâu | |
-| Nếu Cải tiến thêm: giả thuyết cụ thể (nhánh nào của fault tree) + hạn | |
-| Nếu Dừng: bài học ghi lại | |
-| Ngày quyết định lại (trừ khi Dừng) | |
-| PIC ký | |
+| Commit ký tiêu chí | `fa6c809` (giống v1) |
+| Hash chốt cổng vòng 1 | `5d2f98ce` (giống v1) |
+| Mã lần chạy dùng làm bằng chứng | thẻ, mốc base: `R-base-before-20261118-162926-3be29d` · prepared: `R-base-prepared-20261118-162936-3be29d` · after: `R-base-after-20261118-162930-3be29d` |
+| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | `không` (0 ca bị ùn, thời gian chờ tối đa 0.0 phút, chi phí mỗi ticket ~4.293đ ≤ 8.500đ, ROI ~1.33 ≥ 0.15, tổng hoàn tự động tích lũy trong ngày 155.000đ ≤ trần ngân sách Finance 2.000.000đ, 0 PII leak, 0 lỗi oan hãng). |
+| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Khối "theo kho và hãng" trong output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | Tại mốc after, tất cả 4 depot chính thức (`HN`, `HCM`, `DN`, `CT`) đều đạt `pass_rate = 1.0`, chi phí/ticket đều rẻ hơn làm tay 10.000đ; kho `?` (ngoài phạm vi) được chuyển làm tay; không có phân khúc kho/hãng nào bị vi phạm trần nên quyết định **không đổi**. |
+| Quyết định (khoanh một) | **Tiếp tục** |
+| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | Cả 5 chỉ số an toàn bắt buộc đều ĐẠT trên mốc after: `pass_rate = 1.0 >= 0.96`, `pass_k = 1.0 >= 0.92`, `wrongful_refund_vnd = 0 <= 0`, `wrongful_carrier_faults = 0 <= 0`, `pii_leaks = 0 <= 0`. |
+| Bằng chứng 2 | Nhóm chỉ số kinh doanh & vận hành `business_ops` đạt: `cost_per_ticket_vnd = 4293đ <= 8500đ` (tiết kiệm ròng 125.562đ/ngày, rẻ hơn làm tay 10.000đ), `roi = 1.33 >= 0.15`, `queue_stuck = 0 <= 0`. |
+| Bằng chứng 3 | Cổng `write_gate` vòng 2 ngăn chặn triệt để nhánh `fail_open` khi LLM gián đoạn và tuân thủ trần ngân sách bồi thường theo ngày của Finance, giữ vững tỷ lệ chuyển người duyệt hợp lý `escalation_rate = 0.2364 <= 0.35`. |
+| Khớp dòng nào trong `decision_rule` đã ký? | Khớp dòng `"Tiếp tục"`: *"Cả 5 chỉ số bắt buộc (required) và 3 chỉ số kinh doanh - vận hành (business_ops) đều đạt trên cả bộ nền và gói sự cố, đồng thời không có dòng vượt trần nào trong report."* |
+| Nếu Thu hẹp: cắt kho nào / còn bao nhiêu phần trăm / mấy người trực, và ticket bị cắt đi đâu | (Không áp dụng vì mốc after đã kiểm soát triệt để lưu lượng và ngân sách mà không vượt trần). |
+| Nếu Cải tiến thêm: giả thuyết cụ thể (nhánh nào của fault tree) + hạn | (Không áp dụng). |
+| Nếu Dừng: bài học ghi lại | (Không áp dụng). |
+| Ngày quyết định lại (trừ khi Dừng) | `2026-11-25` (trước thời điểm áp dụng chính sách `REFUND-v4` ngày 01/12/2026). |
+| PIC ký | `Nguyễn Văn Tùng (2A202603471) - Đại diện Sản phẩm & Kinh doanh (TV3)` cùng `Nguyễn Hoàng Tùng (2A202603481) - Vận hành & Pháp lý (TV4)` |
 
 **Chỉ ở v2**
-- Quyết định đổi hay giữ so với v1? Vì con số nào: …
-- Report tự kiểm tra: mã lần chạy `__________` · ô nào còn đỏ (nguyên nhân × tầng): …
-- Cổng vòng 1 (mốc prepared) đã đỡ được gì trước khi bàn biết sự cố, và bỏ sót gì: …
-- Report ghi "được phép cân nhắc Tiếp tục" hay "không đủ căn cứ"? Quyết định của bàn có khớp không: …
-- Một thứ bộ thử hôm nay chưa đo, và nó ảnh hưởng quyết định ra sao: …
+- Quyết định đổi hay giữ so với v1? Vì con số nào: Giữ nguyên quyết định **"Tiếp tục"** so với v1 vì toàn bộ 5 chỉ số bắt buộc và 3 chỉ số kinh doanh vận hành đều đạt chuẩn (`pass_rate = 1.0`, `wrongful_refund = 0đ`, `cost_per_ticket = 4.293đ`, `ROI = 1.33`), không có dòng vượt trần nào trong báo cáo.
+- Report tự kiểm tra: mã lần chạy `R-base-after-20261118-162930-3be29d` · ô nào còn đỏ (nguyên nhân × tầng): Không còn ô nào đỏ, cơ chế bảo vệ cấp hệ thống đã chặn thành công lỗi hoàn tiền sai và vượt ngân sách.
+- Cổng vòng 1 (mốc prepared) đã đỡ được gì trước khi bàn biết sự cố, và bỏ sót gì: Cổng vòng 1 đã đỡ được việc hoàn tiền sai lệch theo tracking và ngăn lỗi ghi oan cho đối tác vận chuyển; tuy nhiên đã bỏ sót kịch bản LLM bị lỗi fallback sinh mã `fail_open` tự động duyệt hoàn và bỏ sót việc kiểm tra trần ngân sách linh hoạt của Finance theo ngày.
+- Report ghi "được phép cân nhắc Tiếp tục" hay "không đủ căn cứ"? Quyết định của bàn có khớp không: Report ghi **"Được phép cân nhắc 'Tiếp tục'"**; quyết định của bàn hoàn toàn khớp với bằng chứng đo lường và quy tắc `decision_rule` đã ký.
+- Một thứ bộ thử hôm nay chưa đo, và nó ảnh hưởng quyết định ra sao: Chưa đo lường được độ trễ mạng thực tế và tình trạng nghẽn hàng đợi đồng thời (concurrency race condition) khi nhiều ticket đến cùng một giây trong khung giờ Flash Sale thực tế, điều này cần được giám sát chặt chẽ trong giai đoạn Pilot trước khi nhân rộng.
 
 **Ba dòng bắt buộc** (chép nguyên ba câu này sang `submission/submission.json`, mục `three_lines`)
-1. Một giả định về môi trường mà thiết kế của đội đang dựa vào, có thể sai ngoài thực tế: …
-2. Gate của đội chỉ GIẢM khả năng hay thực sự NGĂN được tác hại? Vì sao: …
-3. Vì data là mock, cần đo lại gì trong pilot thật trước Bước đánh giá 2: …
+1. Một giả định về môi trường mà thiết kế của đội đang dựa vào, có thể sai ngoài thực tế: Người thiết kế ngầm tin rằng dịch vụ LLM Provider luôn phản hồi ổn định và ngân sách Finance cấp luôn cố định 2.000.000đ/ngày, nhưng ngoài thực tế giờ cao điểm có thể làm sập API LLM và Finance có thể chủ động cắt giảm trần ngân sách bồi thường xuống 300.000đ/ngày.
+2. Gate của đội chỉ GIẢM khả năng hay thực sự NGĂN được tác hại? Vì sao: Cổng `write_gate` của đội thực sự NGĂN ĐƯỢC tác hại hoàn tiền sai khi LLM lỗi vì áp dụng quy tắc tất định tính lại quyền lợi từ DB tracking trước khi ghi sổ cái, đồng thời NGĂN ĐƯỢC vượt ngân sách ngày bằng cách so sánh tổng chi tiêu tích lũy với mức tối thiểu giữa trần Finance và trần nhóm.
+3. Vì data là mock, cần đo lại gì trong pilot thật trước Bước đánh giá 2: Cần đo lường lại tỷ lệ lỗi gián đoạn thực tế của nhà cung cấp LLM, độ trễ xử lý đơn hàng của hãng vận chuyển trong các đợt Flash Sale thật, và thời gian chờ duyệt thực tế của nhân viên CSKH khi áp dụng ghi chú giải thích `decision_note`.
