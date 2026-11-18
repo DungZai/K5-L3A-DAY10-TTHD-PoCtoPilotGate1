@@ -2,10 +2,27 @@
 
 ## Thông tin nhóm
 
-- Tên nhóm (`TenNhom`, không dấu, không khoảng trắng): TTHD
+- Tên nhóm (`TenNhom`, không dấu, không khoảng trắng): `TTHD`
 - Lớp: `L3A`
 - Repo của bàn: `K5-L3A-DAY10-TTHD-PoCtoPilotGate1`
 - Thẻ sự cố đã bốc (S1–S8):
+
+## Chuẩn bị · PRD, eval card và môi trường chung
+
+- Bộ được chọn: **LogiX-VN refund agent**, bài Lab 9 của **Hồ Văn Dũng — 2A202603458**.
+- PRD chung: [PRD v1.1](docs/lab9/PRD_v1.1.md).
+- Eval card chung: [Eval card Lab 9](docs/lab9/eval_card.md). Dùng phần **v1**, cùng baseline `E-swarm-20261118-508f`, eval-set SHA `508fdea1690c`, metric spec `1.1` với PRD v1.1; phần v2 là tham khảo bổ sung.
+- Nguồn: [repo Lab 9](https://github.com/DungZai/K5-L3A-DAY09-HoVanDung-2A202603458-EvaluationandFailureAnalysis), thư mục `docs/`. Hai file trên được sao chép nguyên bản từ repo Lab 9 trên máy ngày 18/11/2026; các liên kết audit/trace và đường dẫn report bên trong thuộc repo nguồn.
+- Môi trường chạy chung: **Windows + PowerShell + Python 3.12.10 + Git 2.56.0.windows.1**; chạy harness **Lab 10** trong repo này bằng MockLLM offline, không cần gói ngoài hay API key.
+- Python trên máy: `C:\Users\hdung\AppData\Local\Programs\Python\Python312\python.exe`. Từ thư mục gốc repo, chạy:
+
+  ```powershell
+  & 'C:\Users\hdung\AppData\Local\Programs\Python\Python312\python.exe' -m unittest discover -s tests
+  ```
+
+- Kiểm tra ngày 18/11/2026: **Ran 13 tests — OK**. Trên máy khác đã có Python trong PATH, dùng `python -m unittest discover -s tests`.
+- Số liệu Lab 9 là bằng chứng tham chiếu; tiêu chí Gate 1 của Lab 10 cần được bàn thống nhất và ký riêng trước khi chạy `lab10.eval`.
+- Hỗ trợ AI: dùng Codex để tìm, chọn, sao chép bộ tài liệu chung và kiểm tra môi trường; thành viên phụ trách bổ sung việc sử dụng AI vào mục cá nhân của mình.
 
 ## Thành viên
 
