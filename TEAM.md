@@ -2,9 +2,9 @@
 
 ## Thông tin nhóm
 
-- Tên nhóm (`TenNhom`, không dấu, không khoảng trắng):
-- Lớp: `L3A` / `L3B`
-- Repo của bàn: `K5-<L3A|L3B>-DAY10-<TenNhom>-PoCtoPilotGate1`
+- Tên nhóm (`TenNhom`, không dấu, không khoảng trắng): TTHD
+- Lớp: `L3A`
+- Repo của bàn: `K5-L3A-DAY10-TTHD-PoCtoPilotGate1`
 - Thẻ sự cố đã bốc (S1–S8):
 
 ## Thành viên
@@ -13,10 +13,10 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 
 | STT | Họ và tên | MSSV | Vai | Trưởng nhóm |
 | --: | --------- | ---- | --- | :---------: |
-|   1 |           |      |     |             |
-|   2 |           |      |     |             |
-|   3 |           |      |     |             |
-|   4 |           |      |     |             |
+|   1 |           |      | Kỹ sư cổng (Chính - Code & Guard) | [x] |
+|   2 |           | 2A202603458 | Kỹ sư cổng (Phụ - Test & Trace & Monitor) | [ ] |
+|   3 | Nguyễn Văn Tùng | 2A202603471 | Sản phẩm và kinh doanh | [ ] |
+|   4 |           |      | Vận hành và pháp lý | [ ] |
 |   5 |           |      |     |             |
 
 Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, khớp bảng trên.
@@ -54,3 +54,34 @@ Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi ti�
 
 - **Một điều học được**: Sự khác biệt cốt lõi giữa lỗi ngữ cảnh và lỗi chìm (silent failure) trong các hệ thống Agentic AI có công cụ ghi (write tools). Lỗi chìm nguy hiểm nhất vì cả model và người dùng đều thấy quy trình hoàn tất suôn sẻ, nhưng thiệt hại tài chính và rủi ro pháp lý âm thầm trút lên đối tác thứ ba (hãng vận chuyển, nhà bán hàng).
 - **Một điều còn chưa chắc**: Trong môi trường thực tế khi chính cơ sở dữ liệu tracking của đối tác vận chuyển bị lỗi hoặc cập nhật chậm, làm sao telemetry production phân biệt được giữa việc khách hàng gian lận khai khống và việc dữ liệu hệ thống bị trễ nguồn mà không cần phải đẩy toàn bộ các ca này về cho con người xử lý thủ công?
+
+## NguyenVanTung-2A202603471 (Thành viên 3 - Sản phẩm và kinh doanh)
+
+### Phần việc phụ trách
+
+- **Vai**: Sản phẩm và kinh doanh (Product & Business)
+- **File chuyên trách cấu hình & phiếu**: `config/acceptance_criteria.json`, `config/operating_gates.json` (mục `business`), `templates/form-a-criteria.md` (cầm bút chính Phiếu A), `templates/form-b-evaluation-gates.md` (mục B1, B3, B6, B7.4, B8), `templates/form-c-incident.md` (mục C5, C12).
+- **Các câu hỏi và mục phiếu phụ trách**:
+  - **Phiếu A**: Câu 1.1 (Mục A1: Mục tiêu cấp hệ thống), Câu 1.5 (Mục A3: Đọc khoảng tin cậy bootstrap 95%), Câu 1.6 (Mục A4: Bản tiêu chí 5 ngưỡng bắt buộc, 1 nên có, nhóm `business_ops`, `stop_condition`, 4 nhánh `decision_rule` và ranh giới đầu ra). Chạy lệnh niêm phong và ký tiêu chí `criteria sign` trước khi đánh giá.
+  - **Phiếu B**: Câu 2.1 (Mục B1: Đọc kết quả mốc base, khối kinh doanh - vận hành, phân khúc kho/hãng và phân tích cổng tự chặn vs người duyệt), Câu 2.3 (Mục B3: Bản đồ dữ liệu & ví dụ Data Drift 3 tháng tới), Câu 2.5 (Mục B6: Pre-mortem 4 lăng kính), Câu 2.9 (Mục B7.4: Đặt cổng kinh doanh `business` trong `config/operating_gates.json`), Mục B8 (Dự thảo và chốt Quyết định Gate 1 v1).
+  - **Phiếu C**: Câu 3.2 (Mục C5: Specification bị vi phạm), điều chỉnh cổng kinh doanh (`pilot_scope`, trần ngân sách), Mục C12 (Quyết định Gate 1 v2 cùng 3 dòng bắt buộc cho `submission/submission.json`).
+  - **Giai đoạn 4**: Trình bày thuyết minh số liệu kinh doanh ba mốc (base → prepared → after) và bảo vệ Quyết định Gate 1 trước phản biện.
+
+### Đóng góp cụ thể
+
+- Xây dựng hoàn chỉnh Bản tiêu chí chấp nhận trong `config/acceptance_criteria.json` với 5 ngưỡng an toàn tuyệt đối (`pass_rate_min = 0.96`, `pass_k_min = 0.92`, `wrongful_refund = 0`, `wrongful_carrier_faults = 0`, `pii_leaks = 0`), nhóm vận hành kinh doanh (`cost_per_ticket <= 8500đ`, `roi >= 0.15`, `queue_stuck = 0`), thực hiện ký số `criteria sign` và đẩy lên origin main đúng quy trình.
+- Hoàn thành bản đồ dữ liệu 10 mục của hệ thống, chỉ ra chính xác điểm nguồn sự thật và kịch bản Concept Drift khi chuyển đổi sang chính sách `REFUND-v4` vào ngày 01/12/2026.
+- Thiết lập 4 cổng ngân sách kinh doanh (`daily_refund_cap_vnd = 2.000.000đ`, `cost_budget_per_ticket_vnd = 1.500đ`, `pilot_scope = all 100%`, `roi_min = 0.15`), bảo đảm trợ lý vận hành an toàn và tiết kiệm hơn quy trình thủ công 10.000đ/ticket.
+- Soạn thảo toàn diện dự thảo Quyết định Gate 1 v1 và cấu trúc 3 dòng kết luận bắt buộc tại Gate 1 v2.
+
+### Bằng chứng
+
+- File cấu hình đã ký: `config/acceptance_criteria.json` và `config/acceptance_criteria.lock` (hash `3cf39fc2`, commit `fa6c809`).
+- Phiếu A hoàn chỉnh: `templates/form-a-criteria.md` (commit `92d9ab6`).
+- Phiếu B: `templates/form-b-evaluation-gates.md` các mục B1, B3, B6, B7.4, B8 (commit `53b26b2`).
+- Nhật ký đánh giá `runs/journal.jsonl` và các mốc đánh giá trên hệ thống.
+
+### Exit ticket
+
+- **Một điều học được**: Tiêu chí chấp nhận (Acceptance Criteria) không chỉ là các con số kỹ thuật thuần túy (accuracy, pass rate) mà phải được neo chặt vào các ràng buộc tài chính và vận hành thực tế (chi phí mỗi ticket, ROI, thời gian chờ của con người, trần bồi thường). Đặc biệt, việc niêm phong tiêu chí trước khi đo lường giúp ngăn ngừa triệt để tâm lý nới lỏng tiêu chuẩn để hợp thức hóa kết quả.
+- **Một điều còn chưa chắc**: Khi mở rộng quy mô từ 2 depot thử nghiệm lên 12 depot toàn quốc với lưu lượng tăng đột biến theo mùa (ngày hội mua sắm, bão lũ), làm thế nào để thiết kế một cơ chế cân bằng động giữa tỷ lệ tự động hóa và chi phí dự phòng nhân sự duyệt ca mà vẫn đảm bảo ngưỡng ROI tối thiểu của doanh nghiệp?
