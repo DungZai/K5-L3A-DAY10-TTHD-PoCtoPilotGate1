@@ -30,7 +30,7 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 
 | STT | Họ và tên | MSSV | Vai | Trưởng nhóm |
 | --: | --------- | ---- | --- | :---------: |
-|   1 |           |      | Kỹ sư cổng (Chính - Code & Guard) | [x] |
+|   1 | Hồ Văn Dũng | 2A202603458 | Kỹ sư cổng (Chính - Code & Guard) | [x] |
 |   2 | Vũ Mạnh Hoạch | 2A202603500 | Kỹ sư cổng (Phụ - Test & Trace & Monitor) | [ ] |
 |   3 | Nguyễn Văn Tùng | 2A202603471 | Sản phẩm và kinh doanh | [ ] |
 |   4 | Nguyễn Hoàng Tùng | 2A202603481 | Vận hành và pháp lý | [ ] |
@@ -41,6 +41,37 @@ Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, k
 ## Cá nhân
 
 Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi tiêu đề thành họ tên không dấu và MSSV, ví dụ `## NguyenVanAn-20241234`).
+
+## HoVanDung-2A202603458 (Thành viên 1 - Kỹ sư cổng: Code & Guard)
+
+### Phần việc phụ trách
+
+- Vai: Kỹ sư cổng chính, trưởng nhóm; quản lý Git và phụ trách `lab10/guards.py`.
+- Vòng 1: ba cổng phòng ngừa, phần giải thích kỹ thuật ở Phiếu B mục B7.1; phối hợp TV2 kiểm chứng và cung cấp bằng chứng cho quyết định của nhóm.
+- Vòng 2, thẻ S4: sửa nhánh hoàn tiền khi LLM lỗi và kiểm ngân sách Finance hiện hành; phần sửa code ở Phiếu C mục C7. Giữ nguyên tiêu chí đã ký và bản chốt vòng 1.
+- Không phụ trách thay đổi monitor, số người trực, ngân sách do nhóm lựa chọn, runbook hoặc quyết định v1/v2; các phần này do TV2/TV3/TV4 thực hiện.
+
+### Đóng góp cụ thể
+
+- Viết cổng đối chiếu tiền hoàn với quyền lợi tính từ tracking và chính sách có hiệu lực. Đề xuất không khớp hoặc thiếu dữ kiện được chuyển người xử lý trước khi ghi tiền.
+- Viết cổng chống ghi hoàn lặp dựa vào sổ cái: bỏ thao tác retry cùng khoản đã ghi; khoản khác trên đơn đã có hoàn được chuyển đối soát.
+- Viết cổng kiểm trách nhiệm hãng: không ghi lỗi khi tracking/chính sách không đủ căn cứ; sửa tham số hãng, kiện, tài xế và độ trễ theo bản ghi tracking khi có căn cứ.
+- S4: với `basis == fail_open`, tính lại quyền lợi bằng quy tắc tất định; quyền lợi bằng 0 thì từ chối, khoản trong hạn mức được sửa theo kết quả tính lại, khoản vượt hạn mức phải duyệt lại. Không dùng lỗi LLM làm căn cứ tự động chấp thuận.
+- S4: kiểm khoản hoàn tự động theo trần nhỏ hơn giữa Finance hiện hành và config của nhóm; kiểm tổng đã chi trước khi ghi. Không hardcode mã ticket, ngày sale hoặc ngưỡng riêng của thẻ.
+- Phối hợp quản lý repo riêng tư, cập nhật main và đẩy code/tài liệu. Sử dụng Codex hỗ trợ đọc code, đề xuất và viết cổng, giải thích logic, cập nhật tài liệu và thao tác Git.
+
+### Bằng chứng
+
+- Commit cổng vòng 1: `e66b52e`; commit nâng cấp S4: `d12b4b7`. Bản chốt vòng 1: `5d2f98ce` trong `config/round1.lock`.
+- Phiếu B mục B7.1; Phiếu C mục C7, hai dòng sửa `guards.py`.
+- Báo cáo đã có trên main, do nhóm chạy: `submission/runs/grade-report.md`, mã `R-S4-grade-20261118-173502-c6aba6`; ba mốc S4: `R-S4-before-20261118-173503-c6aba6`, `R-S4-prepared-20261118-173504-c6aba6`, `R-S4-after-20261118-173504-c6aba6`.
+- Theo báo cáo này: S4 after đạt 205/205 lần chạy, `pass_rate = 1.0`, `pass_k = 1.0`, hoàn sai/lỗi hãng oan/PII đều bằng 0; bộ nền không có ca mới hỏng. Tổng hoàn tự động 292.000đ ≤ 300.000đ. Kết quả cả hệ thống còn nhờ cấu hình vận hành của TV3/TV4: 2 người trực, chờ tối đa 15 phút, 0 ca ùn, chi phí 7.296đ/ticket, ROI 0.37, độ phủ 100%.
+- `PASS-VISIBLE` là kết quả phần kiểm tra công khai; test ẩn chưa được chạy trên máy nhóm. Lượt cập nhật mục cá nhân này chỉ đọc bằng chứng đã có, không chạy đánh giá mới.
+
+### Exit ticket
+
+- Một điều rút ra từ phần triển khai: lỗi nhà cung cấp LLM không được làm hệ thống nới quyền ghi tiền. Cổng cần dựa trên dữ liệu và chính sách độc lập; bảo vệ đúng tiền vẫn phải phối hợp đủ người duyệt để không gây quá tải.
+- Một điều còn chưa chắc: trong pilot thật, nếu tracking cập nhật chậm hoặc hai tiến trình đồng thời kiểm ngân sách và ghi sổ, cần thiết kế giao dịch nguyên tử và khóa chống trùng thế nào để bảo đảm không hoàn lặp hoặc vượt trần?
 
 ## VuManhHoach-2A202603500 (Thành viên 2 - Kỹ sư cổng: Test & Trace & Monitor)
 
