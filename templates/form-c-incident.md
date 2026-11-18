@@ -330,14 +330,14 @@ Thẻ S5 dùng mục này cho một con số kinh doanh: chi phí mỗi ticket t
 
 | | Chỉ số theo dõi mới của bàn |
 |---|---|
-| **Tên trong `MONITORS`** | |
-| **Bước / hành vi được đo** | |
-| **Thước đo** (một câu, có đơn vị) | |
-| **Dữ liệu** (trường nào của trial, không có nhãn) | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | |
-| **Khung thời gian / ngưỡng báo động** | |
-| **Điểm mù** (chỉ số này KHÔNG thấy gì) | |
-| Giá trị trên bộ nền · trên thẻ (đọc mục `monitor` của report) | |
+| **Tên trong `MONITORS`** | `model_override_rate` |
+| **Bước / hành vi được đo** | Hành vi model tự ý ghi đè (override) dữ liệu ngày trễ trong tracking DB bằng số ngày do khách tự khai. |
+| **Thước đo** (một câu, có đơn vị) | Tỉ lệ ticket có phát sinh sự kiện model override dữ liệu thực tế (`model_override_rate`), đơn vị: tỉ lệ phần trăm (%) trên tổng số ticket trong ca. |
+| **Dữ liệu** (trường nào của trial, không có nhãn) | Mảng sự kiện `t["events"]` của từng trial; kiểm tra sự kiện có `type == "model_override"`. Dữ liệu production telemetry thuần túy, không cần nhãn ground truth. |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | Tổng số trial có ít nhất một sự kiện `model_override` chia cho tổng số trial: `sum(any(e.get("type") == "model_override" for e in t.get("events", [])) for t in trials) / max(1, len(trials))`. Nếu không có trial nào, trả về 0. |
+| **Khung thời gian / ngưỡng báo động** | Cửa sổ trượt 1 giờ hoặc theo ca trực 8 tiếng (480 phút). Ngưỡng báo động vàng: > 2% tổng số ticket; ngưỡng đỏ: > 5% (cảnh báo nguy cơ khách hàng đang khai khống hàng loạt hoặc model bị drift nhận thức). |
+| **Điểm mù** (chỉ số này KHÔNG thấy gì) | Không thấy trường hợp chính cơ sở dữ liệu tracking DB bị sai lệch từ đầu nguồn của hãng vận chuyển, hoặc trường hợp model suy luận sai mà không bắn ra sự kiện override. |
+| Giá trị trên bộ nền · trên thẻ (đọc mục `monitor` của report) | Bộ nền base: 0.0091 (1/110 ca, đúng ca T-002@55). Trên thẻ sự cố: sẽ đọc và điền sau khi bốc thẻ Sx. |
 
 ---
 
