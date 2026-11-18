@@ -16,7 +16,7 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 |   1 |           |      | Kỹ sư cổng (Chính - Code & Guard) | [x] |
 |   2 |           | 2A202603458 | Kỹ sư cổng (Phụ - Test & Trace & Monitor) | [ ] |
 |   3 | Nguyễn Văn Tùng | 2A202603471 | Sản phẩm và kinh doanh | [ ] |
-|   4 |           |      | Vận hành và pháp lý | [ ] |
+|   4 | Nguyễn Hoàng Tùng | 2A202603481 | Vận hành và pháp lý | [ ] |
 |   5 |           |      |     |             |
 
 Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, khớp bảng trên.
@@ -85,3 +85,29 @@ Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi ti�
 
 - **Một điều học được**: Tiêu chí chấp nhận (Acceptance Criteria) không chỉ là các con số kỹ thuật thuần túy (accuracy, pass rate) mà phải được neo chặt vào các ràng buộc tài chính và vận hành thực tế (chi phí mỗi ticket, ROI, thời gian chờ của con người, trần bồi thường). Đặc biệt, việc niêm phong tiêu chí trước khi đo lường giúp ngăn ngừa triệt để tâm lý nới lỏng tiêu chuẩn để hợp thức hóa kết quả.
 - **Một điều còn chưa chắc**: Khi mở rộng quy mô từ 2 depot thử nghiệm lên 12 depot toàn quốc với lưu lượng tăng đột biến theo mùa (ngày hội mua sắm, bão lũ), làm thế nào để thiết kế một cơ chế cân bằng động giữa tỷ lệ tự động hóa và chi phí dự phòng nhân sự duyệt ca mà vẫn đảm bảo ngưỡng ROI tối thiểu của doanh nghiệp?
+## NguyenHoangTung-2A202603481 (Thành viên 4 - Vận hành và pháp lý)
+
+### Phần việc phụ trách
+
+- **Vai**: Vận hành và pháp lý (Operations & Legal)
+- **File chuyên trách cấu hình & phiếu**: `config/operating_gates.json` (mục `operations`, `legal`), `templates/form-a-criteria.md` (Câu 1.2, 1.4), `templates/form-b-evaluation-gates.md` (Mục B4 HAZOP, Mục B5 Checklist 9 việc, Mục B7.5 Runbook 1-3, Mục B7.6 Giờ cao điểm), `templates/form-c-incident.md` (Mục C4 HAZOP sự cố, Mục C10 Risk register, Mục C11 Runbook 4-5).
+- **Trách nhiệm nộp bài**: Điền và kiểm soát `submission/submission.json`, chạy lệnh kiểm tra đóng gói `lab10.check_submission --collect`.
+
+### Đóng góp cụ thể
+
+- Hoàn thành Câu 1.2 và 1.4 trong Phiếu A: Định lượng mục tiêu kiểm soát dòng tiền và đối soát tuần cho chị Oanh (Kế toán), hạn mức năng lực tiếp nhận cho chị Hạnh (Trưởng ca CSKH); thiết kế chỉ số telemetry production `carrier_dispute_rate` giám sát khiếu nại tranh chấp từ hãng vận chuyển theo cửa sổ trượt 24h.
+- Thiết lập hoàn chỉnh bảng phân tích rủi ro HAZOP mở rộng trên tool `file_carrier_fault` với 5 guidewords kỹ thuật và 3 kịch bản trọng yếu ngoài code (quá tải người duyệt, vượt trần ngân sách Finance, rò rỉ dữ liệu PII người nhận quà sang bên thứ ba).
+- Xây dựng bảng Checklist go-live 9 nhóm việc chuẩn bị Pilot với đầy đủ trạng thái, bằng chứng và phân định rõ ràng người chịu trách nhiệm (PIC có tên cụ thể) cho từng hạng mục.
+- Cấu hình toàn bộ tham số vận hành và pháp lý trong `config/operating_gates.json` (`pic = NV-TUNG`, `approver_id = NV-HANH`, `reviewers_on_shift = 1`, `review_capacity_per_hour = 6`, `max_queue_wait_minutes = 60`, `pii_fields_blocked_to_third_party`, `carrier_fault_requires_recorded_cause = true`).
+- Biên soạn Runbook vận hành 3 phần và quy trình ứng phó Giờ cao điểm, quy định thời hạn ngắt khẩn cấp tối đa 5 phút bảo vệ hệ thống trước sự cố.
+
+### Bằng chứng
+
+- Phiếu A (Mục A1 Câu 1.2, Mục A2 Câu 1.4).
+- Phiếu B (Mục B4 HAZOP, Mục B5 Checklist, Mục B7.5 Runbook 1-3, Mục B7.6 Giờ cao điểm).
+- File cấu hình đã chốt: `config/operating_gates.json` và bản chụp checkpoint `config/operating_gates.round1.json` (hash `5d2f98ce`).
+
+### Exit ticket
+
+- **Một điều học được**: Hệ thống AI vận hành an toàn không chỉ phụ thuộc vào độ chính xác của mô hình hay logic guard trong code, mà cốt lõi nằm ở ranh giới vận hành và pháp lý (SLA hàng chờ, trần ngân sách bồi thường, bảo vệ thông tin PII khách hàng). Việc có một Runbook chi tiết với phân quyền và thời hạn ngắt khẩn cấp cụ thể (kill-switch trong 5 phút) là tấm khiên bảo vệ sống còn khi đưa AI ra môi trường thực tế.
+- **Một điều còn chưa chắc**: Khi xảy ra sự cố đột xuất ngoài giờ làm việc hành chính, cơ chế thông báo và kích hoạt nhân sự dự phòng (standby reviewers) trong kịch bản Giờ cao điểm sẽ được tự động hóa qua webhook như thế nào để đảm bảo SLA 60 phút không bị vi phạm nếu người trực chính không phản hồi kịp thời?
