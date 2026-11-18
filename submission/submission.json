@@ -1,12 +1,18 @@
 {
-  "team": "",
-  "members": [],
-  "incident": "",
-  "decision_v1": "",
-  "decision_v2": "",
+  "team": "K5-L3A-DAY10-TTHD-PoCtoPilotGate1",
+  "members": [
+    "NguyenVanAn-2A202603450",
+    "HoVaTenTV2-2A202603458",
+    "NguyenVanTung-2A202603471",
+    "NguyenHoangTung-2A202603481"
+  ],
+  "incident": "S4",
+  "decision_v1": "Tiếp tục",
+  "decision_v2": "Tiếp tục",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Người thiết kế ngầm tin rằng dịch vụ LLM Provider luôn phản hồi ổn định và ngân sách Finance cấp luôn cố định 2.000.000đ/ngày, nhưng ngoài thực tế giờ cao điểm có thể làm sập API LLM và Finance có thể chủ động cắt giảm trần ngân sách bồi thường xuống 300.000đ/ngày.",
+    "reduce_or_prevent": "Cổng write_gate của đội thực sự NGĂN ĐƯỢC tác hại hoàn tiền sai khi LLM lỗi vì áp dụng quy tắc tất định tính lại quyền lợi từ DB tracking trước khi ghi sổ cái, đồng thời NGĂN ĐƯỢC vượt ngân sách ngày bằng cách so sánh tổng chi tiêu tích lũy với mức tối thiểu giữa trần Finance và trần nhóm.",
+    "measure_in_pilot": "Cần đo lường lại tỷ lệ lỗi gián đoạn thực tế của nhà cung cấp LLM, độ trễ xử lý đơn hàng của hãng vận chuyển trong các đợt Flash Sale thật, và thời gian chờ duyệt thực tế của nhân viên CSKH khi áp dụng ghi chú giải thích decision_note."
   }
 }
+
