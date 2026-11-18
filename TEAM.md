@@ -58,7 +58,6 @@ Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi ti�
 - Viết cổng kiểm trách nhiệm hãng: không ghi lỗi khi tracking/chính sách không đủ căn cứ; sửa tham số hãng, kiện, tài xế và độ trễ theo bản ghi tracking khi có căn cứ.
 - S4: với `basis == fail_open`, tính lại quyền lợi bằng quy tắc tất định; quyền lợi bằng 0 thì từ chối, khoản trong hạn mức được sửa theo kết quả tính lại, khoản vượt hạn mức phải duyệt lại. Không dùng lỗi LLM làm căn cứ tự động chấp thuận.
 - S4: kiểm khoản hoàn tự động theo trần nhỏ hơn giữa Finance hiện hành và config của nhóm; kiểm tổng đã chi trước khi ghi. Không hardcode mã ticket, ngày sale hoặc ngưỡng riêng của thẻ.
-- Phối hợp quản lý repo riêng tư, cập nhật main và đẩy code/tài liệu. Sử dụng Codex hỗ trợ đọc code, đề xuất và viết cổng, giải thích logic, cập nhật tài liệu và thao tác Git.
 
 ### Bằng chứng
 
