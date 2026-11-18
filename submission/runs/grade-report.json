@@ -1,11 +1,62 @@
 {
- "run_id": "R-S4-grade-20261118-170335-6d5132",
+ "run_id": "R-S4-grade-20261118-171326-144c53",
  "incident": "S4",
  "grader_version": "lab10-1.0",
- "code_hash": "6d5132c9df2cc2384e5caec216c8ca4928eb74dd93ce45928ba2e3911b6c4887",
+ "code_hash": "144c53cab5b34b34922b73752c6cd16c9d509fd23e22e95aac54f2fe68c416cb",
  "integrity": {
-  "ok": true,
-  "changed": [],
+  "ok": false,
+  "changed": [
+   "data/tickets.jsonl",
+   "incidents/S1/card.json",
+   "incidents/S1/card.md",
+   "incidents/S1/tickets.jsonl",
+   "incidents/S1/world_patch.json",
+   "incidents/S2/card.json",
+   "incidents/S2/card.md",
+   "incidents/S2/tickets.jsonl",
+   "incidents/S2/world_patch.json",
+   "incidents/S3/card.json",
+   "incidents/S3/card.md",
+   "incidents/S3/tickets.jsonl",
+   "incidents/S3/world_patch.json",
+   "incidents/S4/card.json",
+   "incidents/S4/card.md",
+   "incidents/S4/tickets.jsonl",
+   "incidents/S4/world_patch.json",
+   "incidents/S5/card.json",
+   "incidents/S5/card.md",
+   "incidents/S5/tickets.jsonl",
+   "incidents/S5/world_patch.json",
+   "incidents/S6/card.json",
+   "incidents/S6/card.md",
+   "incidents/S6/tickets.jsonl",
+   "incidents/S6/world_patch.json",
+   "incidents/S7/card.json",
+   "incidents/S7/card.md",
+   "incidents/S7/tickets.jsonl",
+   "incidents/S7/world_patch.json",
+   "incidents/S8/card.json",
+   "incidents/S8/card.md",
+   "incidents/S8/tickets.jsonl",
+   "incidents/S8/world_patch.json",
+   "lab10/__init__.py",
+   "lab10/_gradectx.py",
+   "lab10/_noop_guards.py",
+   "lab10/agent.py",
+   "lab10/check_submission.py",
+   "lab10/checkpoint.py",
+   "lab10/criteria.py",
+   "lab10/eval.py",
+   "lab10/gate.py",
+   "lab10/grade.py",
+   "lab10/helpers.py",
+   "lab10/mock_llm.py",
+   "lab10/ops.py",
+   "lab10/tools.py",
+   "lab10/trace.py",
+   "lab10/world.py",
+   "tests/test_public.py"
+  ],
   "manifest": "MANIFEST.json"
  },
  "criteria": {
@@ -1325,9 +1376,9 @@
   }
  },
  "run_ids": {
-  "before": "R-S4-before-20261118-170336-6d5132",
-  "prepared": "R-S4-prepared-20261118-170336-6d5132",
-  "after": "R-S4-after-20261118-170336-6d5132"
+  "before": "R-S4-before-20261118-171327-144c53",
+  "prepared": "R-S4-prepared-20261118-171327-144c53",
+  "after": "R-S4-after-20261118-171327-144c53"
  },
  "visible": {
   "before_red": true,
@@ -1403,15 +1454,15 @@
   "rule": "Chỉ được chọn 'Tiếp tục' khi không vượt trần nào và mọi ngưỡng đã ký đều đạt. Thu hẹp, Cải tiến thêm, Dừng có lý do và có số thì vẫn là quyết định đạt."
  },
  "checks": {
-  "integrity": true,
+  "integrity": false,
   "criteria": true,
   "visible": true,
   "hidden": null,
   "regression": true,
   "monitor": true
  },
- "hard_gates_ok": true,
+ "hard_gates_ok": false,
  "score": null,
- "verdict": "PASS-VISIBLE (chưa chạy test ẩn)",
- "seconds": 0.772
+ "verdict": "FAIL",
+ "seconds": 0.831
 }
