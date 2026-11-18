@@ -1,6 +1,6 @@
 # Phiếu C · Sự cố và quyết định v2 · Khối 3 (phút 125–200)
 
-**Bàn:** ______ · **Thẻ đã bốc:** ___ *(để trống tới phút 125; bốc số xong thì ghi đúng số đó, ví dụ `S3`. Lab Coach đối chiếu với sổ; lệnh tự kiểm tra in dòng này trong report.)*
+**Bàn:** K5-L3A-DAY10-TTHD-PoCtoPilotGate1 · **Thẻ đã bốc:** S4 *(Nhóm xác nhận đã bốc S4; mọi lệnh đánh giá sự cố dùng `--incident S4`.)*
 
 Mở `incidents/Sx/card.md` của đúng số đã bốc. Các bước trên thẻ trỏ về đúng mục trong phiếu này. Mục C3 chỉ điền phần ứng với
 số thẻ của bàn; các phần khác để trống.
@@ -315,8 +315,8 @@ python3 -m lab10.grade --incident Sx
 
 | Nhánh fault tree | Nguyên nhân | Chỗ sửa (hàm + nhánh trong `guards.py`, hoặc khoá trong `operating_gates.json`) | Tầng (phát hiện / chặn / giới hạn thiệt hại / vận hành) | GIẢM khả năng hay NGĂN hẳn? Vì sao | Mã lần chạy sau khi sửa |
 |---|---|---|---|---|---|
-| [1] | | | | | |
-| [2] | | | | | |
+| [1] (TV1; chờ đối chiếu nhánh C6 do TV2/TV3 phụ trách) | `agent.py` có nhánh `policy_check` lỗi sau retry thì đặt `basis = fail_open`, hoàn phí và đề xuất ghi lỗi hãng dù chưa kiểm chính sách thành công. Đây là nhận định từ đọc code, chưa phải kết quả trace. | `lab10/guards.py`, `write_gate` / `issue_refund`: tính lại quyền lợi từ tracking và chính sách hiện hành; với `basis == fail_open`, từ chối nếu quyền lợi bằng 0, sửa số tiền nếu trong hạn mức tự động, chuyển duyệt lại nếu vượt hạn mức. Giữ cổng kiểm trách nhiệm hãng. | Chặn trước khi ghi tiền; sửa tham số bằng quy tắc tất định; chặn ghi lỗi hãng thiếu căn cứ. | NGĂN nhánh hoàn phí không có quyền lợi tại điểm ghi khi dữ liệu tracking/chính sách đúng; không bảo đảm dữ liệu nguồn đúng hoặc giải quyết việc thiếu người. Ca đủ căn cứ từ chối không bị đẩy thêm vào hàng chờ chỉ vì LLM lỗi. | Chưa chạy theo yêu cầu của người dùng; cần TV1/TV2 bổ sung mã và kết quả kiểm chứng. |
+| [2] (TV1; chờ đối chiếu nhánh C6 do TV2/TV3 phụ trách) | Trần `business.daily_refund_cap_vnd` vòng 1 là 2.000.000đ, trong khi `ops_limits.daily_auto_refund_budget_vnd` của ngày sale S4 là 300.000đ. Cổng config hiện chỉ kiểm trần của nhóm. | `lab10/guards.py`, `write_gate` / `issue_refund`: khoản tự động không có `approval_id` phải tuân thủ giá trị nhỏ hơn giữa trần Finance hiện hành và trần nhóm. Đọc tổng tiền bằng `auto_refund_today_vnd()`; kiểm sau chống ghi lặp, trước ghi tiền. Không đổi config của TV3/TV4. | Giới hạn thiệt hại trước thao tác ghi; chuyển khoản vượt ngân sách sang người duyệt. | NGĂN vượt ngân sách tự động trong mô phỏng ghi tuần tự khi sổ cái và trần nguồn đúng. Không tự tăng ngân sách, không xử lý hàng chờ quá tải; môi trường ghi đồng thời cần kiểm soát nguyên tử ở kho dữ liệu. | Chưa chạy theo yêu cầu của người dùng; cần TV1/TV2 bổ sung mã và kết quả kiểm chứng. |
 | [3] | | | | | |
 
 ---
